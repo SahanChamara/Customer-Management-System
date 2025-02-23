@@ -20,10 +20,12 @@ function addCustomer() {
 
   fetch("http://localhost:8080/customer/add", requestOptions)
     .then((response) => response.text())
-    .then((result) => console.log(result))
+    .then((result) => {
+      loadCustomer();
+    })
     .catch((error) => console.error(error));
 
-  loadCustomer();
+  
 }
 
 // Search Customer
@@ -36,22 +38,24 @@ function searchCustomers() {
 
   fetch(`http://localhost:8080/customer/search/${customerId}`, requestOptions)
     .then((response) => response.json())
-    .then((result) => {
+    .then((result) => {      
       let tBody = document.getElementById("customerTableBody");
       let body = "";
 
-      console.log(result);
-
-      body += `<tr>                
+      if(result!=null){
+        body += `<tr>                
                 <td>${result.id}</td>
                 <td>${result.name}</td>
                 <td>${result.address}</td>
                 <td>${result.salary}</td>
-                <td><button type="button" id="submitBtn" onclick="updateCustomer(${customer.id})" style="background-color:green;">Update Customer</button></td>
-                <td><button type="button" id="submitBtn" onclick="deleteCustomer(${customer.id})" style="background-color:red;">Delete Customer</button></td>
+                <td><button type="button" id="submitBtn" onclick="updateCustomer(${result.id})" style="background-color:green;">Update Customer</button></td>
+                <td><button type="button" id="submitBtn" onclick="deleteCustomer(${result.id})" style="background-color:red;">Delete Customer</button></td>
               </tr>`;
 
       tBody.innerHTML = body;
+      }else{
+        document.getElementById("searchInput").value = "No customer Found";
+      }
     });
 }
 
@@ -75,11 +79,21 @@ function updateCustomer(customerId) {
     .catch((error) => console.error(error));
 }
 
-function reloadTable() {
-  loadCustomer();
+// Delete Customer
+function  deleteCustomer(customerId){
+  const requestOptions = {
+    method: "DELETE",
+    redirect: "follow"
+  };
+  
+  fetch(`http://localhost:8080/customer/delete/${customerId}`, requestOptions)
+    .then((response) => response.text())
+    .then((result) => {loadCustomer();})
+    .catch((error) => console.error(error));    
 }
 
 function resetForm() {
+  document.getElementById("id").value = "";
   document.getElementById("name").value = "";
   document.getElementById("address").value = "";
   document.getElementById("salary").value = "";
@@ -106,4 +120,8 @@ function loadCustomer() {
 
       tbBody.innerHTML = body;
     });
+}
+
+function reloadTable(){
+  loadCustomer();
 }
