@@ -1,28 +1,7 @@
 loadCustomer();
 
-function loadCustomer() {
-  let tbBody = document.getElementById("customerTableBody");
-  let body = "";
-
-  fetch("http://localhost:8080/customer/getAll")
-    .then((res) => res.json())
-    .then((data) => {
-      console.log(data);
-
-      data.forEach((customer) => {
-        body += `<tr>                
-                <td>${customer.id}</td>
-                <td>${customer.name}</td>
-                <td>${customer.address}</td>
-                <td>${customer.salary}</td>
-              </tr>`;
-      });
-
-      tbBody.innerHTML = body;
-    });
-}
-
-function addCustomer() {    
+// Add Customer
+function addCustomer() {
   const myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/json");
 
@@ -31,8 +10,6 @@ function addCustomer() {
     address: document.getElementById("address").value,
     salary: document.getElementById("salary").value,
   });
-
-  loadCustomer();
 
   const requestOptions = {
     method: "POST",
@@ -44,33 +21,89 @@ function addCustomer() {
   fetch("http://localhost:8080/customer/add", requestOptions)
     .then((response) => response.text())
     .then((result) => console.log(result))
-    .catch((error) => console.error(error));    
+    .catch((error) => console.error(error));
+
+  loadCustomer();
 }
 
-function searchCustomers(){
-    let customerId = document.getElementById("searchInput").value;
-    let name="";
-    const requestOptions = {
-        method: "GET",
-        redirect: "follow"
-      };
-      
-      fetch(`http://localhost:8080/customer/search/${customerId}`, requestOptions)
-        .then((response) => response.json())
-        .then((result) => {
-            console.log(result)
-            name = result.name
-            console.log(name);
+// Search Customer
+function searchCustomers() {
+  let customerId = document.getElementById("searchInput").value;
+  const requestOptions = {
+    method: "GET",
+    redirect: "follow",
+  };
 
+  fetch(`http://localhost:8080/customer/search/${customerId}`, requestOptions)
+    .then((response) => response.json())
+    .then((result) => {
+      let tBody = document.getElementById("customerTableBody");
+      let body = "";
 
-            document.getElementById("name").innerHTML = name;
-            document.getElementById("address").oninput = name;
-            //document.getElementById("name").innerHTML = result.name,
-            // document.getElementById("address").value,
-            // document.getElementById("salary").value,
-        })
-        
-        
-        // .catch((error) => console.error(error));
+      console.log(result);
+
+      body += `<tr>                
+                <td>${result.id}</td>
+                <td>${result.name}</td>
+                <td>${result.address}</td>
+                <td>${result.salary}</td>
+                <td><button type="button" id="submitBtn" onclick="updateCustomer(${customer.id})" style="background-color:green;">Update Customer</button></td>
+                <td><button type="button" id="submitBtn" onclick="deleteCustomer(${customer.id})" style="background-color:red;">Delete Customer</button></td>
+              </tr>`;
+
+      tBody.innerHTML = body;
+    });
 }
 
+//Update Customer
+function updateCustomer(customerId) {
+  const requestOptions = {
+    method: "GET",
+    redirect: "follow",
+  };
+
+  fetch(`http://localhost:8080/customer/search/${customerId}`, requestOptions)
+    .then((response) => response.json())
+    .then((result) => {
+      if (result != null) {
+        document.getElementById("id").value = result.id;
+        document.getElementById("name").value = result.name;
+        document.getElementById("address").value = result.address;
+        document.getElementById("salary").value = result.salary;
+      }
+    })
+    .catch((error) => console.error(error));
+}
+
+function reloadTable() {
+  loadCustomer();
+}
+
+function resetForm() {
+  document.getElementById("name").value = "";
+  document.getElementById("address").value = "";
+  document.getElementById("salary").value = "";
+}
+
+// View Customer
+function loadCustomer() {
+  let tbBody = document.getElementById("customerTableBody");
+  let body = "";
+
+  fetch("http://localhost:8080/customer/getAll")
+    .then((res) => res.json())
+    .then((data) => {
+      data.forEach((customer) => {
+        body += `<tr>                
+                <td>${customer.id}</td>
+                <td>${customer.name}</td>
+                <td>${customer.address}</td>
+                <td>${customer.salary}</td>
+                <td><button type="button" id="submitBtn" onclick="updateCustomer(${customer.id})" style="background-color:green;">Update Customer</button></td>
+                <td><button type="button" id="submitBtn" onclick="deleteCustomer(${customer.id})" style="background-color:red;">Delete Customer</button></td>
+              </tr>`;
+      });
+
+      tbBody.innerHTML = body;
+    });
+}
